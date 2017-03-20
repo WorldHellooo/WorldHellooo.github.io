@@ -34,7 +34,7 @@
 <p><strong>DeepTrack</strong>在线学习一个目标分类器，严重受限于数据的缺失。</p>
 <p>《Online tracking by learning discriminative saliency map with convolutional neural network.》基于一个预训练的ImageNet网络，学习针对目标的显著性图。</p>
 <p>待补充。。。</p>
-<h2 id="Siamese-Instance-Search-Tracker"><a href="#Siamese-Instance-Search-Tracker" class="headerlink" title="Siamese Instance Search Tracker"></a>Siamese Instance Search Tracker</h2><p><img src="&#39;http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fdtdw1fldxj20lh0ikjvk.jpg&#39;" alt="Fig2"></p>
+<h2 id="Siamese-Instance-Search-Tracker"><a href="#Siamese-Instance-Search-Tracker" class="headerlink" title="Siamese Instance Search Tracker"></a>Siamese Instance Search Tracker</h2><p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fdtdw1fldxj20lh0ikjvk.jpg" alt="Fig2"></p>
 <p>‘conv’, ‘maxpool’, ‘roipool’, ‘fc’分别代表卷积层、最大化池化、感兴趣区域池化、全连接层。中括号中的数字是kernel size, number of outputs和stride。fc层有4096个单元，所有的卷积层后都接着一个ReLU层。</p>
 <h3 id="网络细节选择"><a href="#网络细节选择" class="headerlink" title="网络细节选择"></a>网络细节选择</h3><ul>
 <li>Max pooling会<strong>降低图像的分辨率，从而影响定位的精确性</strong>；但是却能增强对局部形变的不变性。因此本网络中只有前几层为了消除噪声提取特征而加入了maxpooling。</li>
