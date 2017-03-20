@@ -44,7 +44,7 @@
 <li>使用类AlexNet或类VGGNet，以利用ImageNet预训练的网络参数。</li>
 </ul>
 <h3 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h3><p>希望让网络生成这样的特征表达：和正样本对足够接近，而与负样本对至少相隔一个最小距离。即margin contrastive loss如下：<br>$$L(x_j, x_k, y_{jk}) = \frac{1}{2} y_{jk} D^2 + \frac{1}{2} (1 - y_{jk}) \max(0, \epsilon - D^2)$$</p>
-<p>这里$D=||f(x_j)-f(x_k)||_2$是两个L2正则化的表达的欧式距离，$y_{jk}\in{0,1}$表示两个输入是否是同一个目标。$\epsilon$是不同目标之间应满足的最小间距。</p>
+<p>这里$D=||f(x_j)-f(x_k)||_2$是两个L2正则化的表达的欧式距离，$y_{jk}\in\{0,1\}$表示两个输入是否是同一个目标。$\epsilon$是不同目标之间应满足的最小间距。</p>
 <h2 id="实验-amp-结论"><a href="#实验-amp-结论" class="headerlink" title="实验&amp;结论"></a>实验&amp;结论</h2><h3 id="评估标准"><a href="#评估标准" class="headerlink" title="评估标准"></a>评估标准</h3><ul>
 <li><strong>Success Plot</strong>. 如果算法估计的bounding box（bbox）和ground truth box（gt）的重叠率超过一个阈值，则判定跟踪成功。</li>
 <li><strong>Precision Plot</strong>. 如果估计的bbox中心和gt中心距离小于某个阈值，则判定追踪成功。</li>
