@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>SiamFC算法改进思路 | WorldHellooo's Blog</title><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/5.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">SiamFC算法改进思路</h1><a id="logo" href="/.">WorldHellooo's Blog</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">SiamFC算法改进思路</h1><div class="post-meta">Mar 22, 2017<span> | </span><span class="category"><a href="/categories/Visual-Tracking/">Visual Tracking</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> Hits</span></span></div><div class="post-content"><p>视频追踪问题中，目标通常是连续可微的。</p>
+<p>SiamFC利用全卷积孪生网络结构对搜索域和样本图像进行相似度匹配，实现追踪目标。</p>
+<p>本文分析了SiamFC在vot2015数据集上的追踪结果，总结出以下问题，并提出针对性的改进方案。</p>
+<h2 id="表现鲁棒"><a href="#表现鲁棒" class="headerlink" title="表现鲁棒"></a>表现鲁棒</h2><ul>
+<li>小范围晃动</li>
+<li>运动模糊</li>
+<li>短时局部遮挡</li>
+</ul>
+<h2 id="重点问题"><a href="#重点问题" class="headerlink" title="重点问题"></a>重点问题</h2><h3 id="光照变化"><a href="#光照变化" class="headerlink" title="光照变化"></a>光照变化</h3><p>视频中白色猫由亮处转入阴影中，跟踪结果开始出现偏差。</p>
+<p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fdvq4soz7ej20gb0c6tdp.jpg" alt="Fernando"></p>
+<p>光照条件较差，而且目标的衣服为黑色，与背景相似。特征不够明显。</p>
+<p><img src="http://wx3.sinaimg.cn/mw690/e57dfbd0ly1fdvq4ru04dj20h309qtfv.jpg" alt="singer2"></p>
+<h3 id="形变、尺度变换"><a href="#形变、尺度变换" class="headerlink" title="形变、尺度变换"></a>形变、尺度变换</h3><p>本视频中镜头由远突然拉近，原本跟踪的是歌手的面部，却无法及时适应尺度的变化。</p>
+<p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fdvq4rcev1j20mn0dbahr.jpg" alt="singer3"></p>
+<h3 id="复杂背景"><a href="#复杂背景" class="headerlink" title="复杂背景"></a>复杂背景</h3><p>当首帧标定框内目标外的背景信息较复杂时，也易对追踪造成干扰。</p>
+<p>本视频中，在首帧进行标定时，框内除恐龙模型外背景信息也较为复杂，而且颜色与目标相近。</p>
+<p><img src="http://wx3.sinaimg.cn/mw690/e57dfbd0ly1fdvq4tagnyj20x60nbtym.jpg" alt="dinosaur"></p>
+<p>本视频中，目标剧烈旋转运动，而且背景信息也非常复杂，对追踪干扰较大。</p>
+<p><img src="http://wx3.sinaimg.cn/mw690/e57dfbd0ly1fdvq4s9919j20yh0k3try.jpg" alt="gymnastics"></p>
+<h3 id="相似物"><a href="#相似物" class="headerlink" title="相似物"></a>相似物</h3><p>一般是背景中存在与目标颜色、外观相似的干扰物。</p>
+<p>当一幅图中出现多个相似目标，搜索域中也可能会混入干扰目标。</p>
+<p><img src="http://wx2.sinaimg.cn/mw690/e57dfbd0ly1fdvq4vraxlj20da09tdmh.jpg" alt="sheep"></p>
+<p>目标与干扰物相交而过。</p>
+<p><img src="http://wx3.sinaimg.cn/mw690/e57dfbd0ly1fdvq4uu63fj20oz0e9b0c.jpg" alt="birds2"></p>
+<h3 id="快速移动、大面积遮挡"><a href="#快速移动、大面积遮挡" class="headerlink" title="快速移动、大面积遮挡"></a>快速移动、大面积遮挡</h3><p>当目标突然加速运动或被遮挡，逃离了模型的搜索区域。跟丢目标后，未能重新识别上。</p>
+<p>小女孩突然加速，且此时相机对焦出现模糊，干扰了追踪结果。</p>
+<p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fdvq4ucdccj20hm0d2gtt.jpg" alt="girl"></p>
+<h2 id="总结及解决思路"><a href="#总结及解决思路" class="headerlink" title="总结及解决思路"></a>总结及解决思路</h2><p>视频追踪中出现的问题往往是多方面干扰因素造成的，因此上面只是取一些代表性的干扰因素予以图示。</p>
+<p>综合考虑，能够导致SiamFC模型failure的根本原因大致如下：</p>
+<ul>
+<li>目标特征不够具体、突出、全面</li>
+<li>没能利用好空间信息、运动信息</li>
+<li>搜索域方法的局限性</li>
+<li>etc.</li>
+</ul>
+<h3 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h3><h4 id="必须加入在线更新的策略"><a href="#必须加入在线更新的策略" class="headerlink" title="必须加入在线更新的策略"></a>必须加入在线更新的策略</h4><p>一些方法为了提升速度而选择放弃在线更新，极大地浪费了视频序列中的目标信息。</p>
+<p>但是在线更新必须要面临两个问题，一个是如何更新，会影响速度和效果；还有一个是更新带来的模型漂移，即目标信息误差的累积。</p>
+<h4 id="需要对首帧标注图像做处理"><a href="#需要对首帧标注图像做处理" class="headerlink" title="需要对首帧标注图像做处理"></a>需要对首帧标注图像做处理</h4><p>首帧标注是唯一的绝对可信的目标信息。而SiamFC模型中，采用的是矩形examplar image与搜索域search region进行互相关计算，如果不能降低examplar图像中背景信息的干扰，则必然会对结果造成影响。</p>
+<p>因此应当对标注图像进行进一步的目标提取，并对背景信息进行抑制。</p>
+<h4 id="利用空间信息，估计运动模型"><a href="#利用空间信息，估计运动模型" class="headerlink" title="利用空间信息，估计运动模型"></a>利用空间信息，估计运动模型</h4><p>在存在较多相似目标的场景中，可能特征匹配难以准确地判断哪个才是真正的目标。而人在这种场景下追踪目标的策略往往是根据</p>
+<ul>
+<li>1、目标的空间信息，例如一队人中的第几个，或者目标周围有哪些参照物。这一点可以通过对目标旁边的背景进行建模实现。</li>
+<li>2、根据目标的运动轨迹进行预测，因为目标的变化(无论是位置还是外观)在序列中往往是连续可微的。</li>
+</ul>
+<p>（上课去。。回来继续补充）</p>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://worldhellooo.github.io/2017/03/22/SiamFC改进思路/" data-id="cj0kt80w300007oqmjkyhycmv" class="article-share-link">分享到</a><div class="tags"><a href="/tags/目标追踪/">目标追踪</a></div><div class="post-nav"><a href="/2017/03/21/深度网络训练中的一些参数/" class="next">深度网络训练中的一些参数</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://worldhellooo.github.io"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Deep-Learning/">Deep Learning</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Visual-Tracking/">Visual Tracking</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/目标追踪-研究背景-主流思路/" style="font-size: 15px;">目标追踪 研究背景 主流思路</a> <a href="/tags/实例搜索-孪生结果-目标追踪/" style="font-size: 15px;">实例搜索 孪生结果 目标追踪</a> <a href="/tags/目标追踪/" style="font-size: 15px;">目标追踪</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/03/22/SiamFC改进思路/">SiamFC算法改进思路</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/21/深度网络训练中的一些参数/">深度网络训练中的一些参数</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/20/SINT/">Intro of Siamese Instance Search for Tracking</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/19/SIFT/">SIFT</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/19/目标追踪经典算法系列/">目标追踪算法之研究背景</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/19/hello-world/">Hello World</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://blog.jcix.top" title="Zhangjc's blog" target="_blank">Zhangjc's blog</a><ul></ul><a href="http://chaway.github.io" title="Chaway's blog" target="_blank">Chaway's blog</a><ul></ul><a href="http://www.votchallenge.net" title="VOT Challenge" target="_blank">VOT Challenge</a><ul></ul><a href="http://www.visual-tracking.net" title="OTB Benchmark" target="_blank">OTB Benchmark</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">© <a href="/." rel="nofollow">WorldHellooo's Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css?v=0.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
