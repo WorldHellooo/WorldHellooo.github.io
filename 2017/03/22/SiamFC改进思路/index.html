@@ -25,6 +25,19 @@
 <h3 id="快速移动、大面积遮挡"><a href="#快速移动、大面积遮挡" class="headerlink" title="快速移动、大面积遮挡"></a>快速移动、大面积遮挡</h3><p>当目标突然加速运动或被遮挡，逃离了模型的搜索区域。跟丢目标后，未能重新识别上。</p>
 <p>小女孩突然加速，且此时相机对焦出现模糊，干扰了追踪结果。</p>
 <p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fdvq4ucdccj20hm0d2gtt.jpg" alt="girl"></p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>对模型最后的responseMap进行分析：</p>
+<p>左侧为响应图，右侧为对应scale的search image。图片名字中的数字代表第几帧。</p>
+<p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fe4xtkapfdj205t03bmxf.jpg" alt="responsemap1"></p>
+<p><img src="http://wx2.sinaimg.cn/mw690/e57dfbd0ly1fe4xtjwrtdj206003it90.jpg" alt="responsemap2"></p>
+<p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fe4xtjgwgbj206103x0t1.jpg" alt="responsemap3"></p>
+<p><img src="http://wx3.sinaimg.cn/mw690/e57dfbd0ly1fe4xtj4jtfj206003umxh.jpg" alt="responsemap4"></p>
+<p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fe4xtipk4zj206203sdg5.jpg" alt="responsemap5"></p>
+<p><img src="http://wx2.sinaimg.cn/mw690/e57dfbd0ly1fe4xti344yj206303v0t3.jpg" alt="responsemap6"></p>
+<p><img src="http://wx2.sinaimg.cn/mw690/e57dfbd0ly1fe4xthplxfj205z03uglx.jpg" alt="responsemap7"></p>
+<p><img src="http://wx3.sinaimg.cn/mw690/e57dfbd0ly1fe4xtheu5ej206203wwen.jpg" alt="responsemap8"></p>
+<p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fe4xth0ew1j205x03rq38.jpg" alt="responsemap9"></p>
+<p>可以看到不只小女孩会有响应，其他人出现的时候也会产生响应。但是背景却没有响应，说明卷积网络的objective能力很好，但是对于类内的物体区别能力很差。所以很容易被其他目标干扰。</p>
+<p>怀疑可能是由于采用的网络为<strong>专门为分类任务设计的Alexnet</strong>，导致类内区分度不够。</p>
 <h2 id="总结及解决思路"><a href="#总结及解决思路" class="headerlink" title="总结及解决思路"></a>总结及解决思路</h2><p>视频追踪中出现的问题往往是多方面干扰因素造成的，因此上面只是取一些代表性的干扰因素予以图示。</p>
 <p>综合考虑，能够导致SiamFC模型failure的根本原因大致如下：</p>
 <ul>
@@ -33,11 +46,41 @@
 <li>搜索域方法的局限性</li>
 <li>etc.</li>
 </ul>
-<h3 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h3><h4 id="必须加入在线更新的策略"><a href="#必须加入在线更新的策略" class="headerlink" title="必须加入在线更新的策略"></a>必须加入在线更新的策略</h4><p>一些方法为了提升速度而选择放弃在线更新，极大地浪费了视频序列中的目标信息。</p>
+<h3 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h3><h4 id="1、必须加入在线更新的策略"><a href="#1、必须加入在线更新的策略" class="headerlink" title="1、必须加入在线更新的策略"></a>1、必须加入在线更新的策略</h4><p>一些方法为了提升速度而选择放弃在线更新，极大地浪费了视频序列中的目标信息。</p>
 <p>但是在线更新必须要面临两个问题，一个是如何更新，会影响速度和效果；还有一个是更新带来的模型漂移，即目标信息误差的累积。</p>
-<h4 id="需要对首帧标注图像做处理"><a href="#需要对首帧标注图像做处理" class="headerlink" title="需要对首帧标注图像做处理"></a>需要对首帧标注图像做处理</h4><p>首帧标注是唯一的绝对可信的目标信息。而SiamFC模型中，采用的是矩形examplar image与搜索域search region进行互相关计算，如果不能降低examplar图像中背景信息的干扰，则必然会对结果造成影响。</p>
+<p>看到一个思路《Visual Tracking by Reinforced Decision Making》，建立一个样本池，并训练一个决策模型，选择最合适的template。</p>
+<h4 id="2、需要对首帧标注图像做处理"><a href="#2、需要对首帧标注图像做处理" class="headerlink" title="2、需要对首帧标注图像做处理"></a>2、需要对首帧标注图像做处理</h4><p>首帧标注是唯一的绝对可信的目标信息。而SiamFC模型中，采用的是矩形examplar image与搜索域search region进行互相关计算，如果不能降低examplar图像中背景信息的干扰，则必然会对结果造成影响。</p>
 <p>因此应当对标注图像进行进一步的目标提取，并对背景信息进行抑制。</p>
-<h4 id="利用空间信息，估计运动模型"><a href="#利用空间信息，估计运动模型" class="headerlink" title="利用空间信息，估计运动模型"></a>利用空间信息，估计运动模型</h4><p>在存在较多相似目标的场景中，可能特征匹配难以准确地判断哪个才是真正的目标。而人在这种场景下追踪目标的策略往往是根据</p>
+<p><strong>尝试1</strong>：</p>
+<p>直接对首帧图像进行处理，目标外的背景涂成<strong>白色</strong>。</p>
+<p>dinosaur序列没有明显效果提升。一如既往没有跟到目标。</p>
+<p>bag序列修改后，spr=0.5661，修改前，spr=0.6061。居然变差了一点点。。有些尴尬。</p>
+<p><strong>尝试2</strong>：</p>
+<p>分析可能是白色背景的问题，改成黑色试试。</p>
+<p>改成黑色背景，dinosaur序列的spr虽然没有改善，但是观察结果有增强。</p>
+<p>bag序列<strong>提升很明显</strong>，spr从0.6061提升到0.7452。</p>
+<p>但是对gym3序列进行实验时效果反而很差。改为白色背景则又有所提升。分析是由于其背景主色偏黑所致。</p>
+<p>说明需要增强的是目标和背景的对比度。</p>
+<p><strong>尝试3</strong>：<br>使用FCN进行图像分割：</p>
+<p>直接将fcn的输出作为mask，乘以z_crop。分割效果不佳，目标偏小，反而降低了spr。</p>
+<p>明天尝试对分割结果进行腐蚀操作。</p>
+<p>腐蚀后即使分割效果很好，但是追踪结果却非常差。</p>
+<p><img src="http://wx2.sinaimg.cn/mw690/e57dfbd0ly1fe2cnfmdijj208b0663yy.jpg" alt="分割前"><br><img src="http://wx1.sinaimg.cn/mw690/e57dfbd0ly1fe2cng0x8yj208b0660sp.jpg" alt="分割后"></p>
+<p>分割后模型产生的responseMap如下（与上面对应）：</p>
+<p><img src="http://wx2.sinaimg.cn/mw690/e57dfbd0ly1fe4yzk9yqhj205w03b3yr.jpg" alt="respmap_seg1"></p>
+<p><img src="http://wx1.sinaimg.cn/mw690/e57dfbd0ly1fe4yzjwg31j205x03tq38.jpg" alt="respmap_seg2"></p>
+<p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fe4yzj76h7j205u03t0t2.jpg" alt="respmap_seg3"></p>
+<p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fe4yzinw2ij206103x0t2.jpg" alt="respmap_seg4"></p>
+<p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fe4yziaum8j205z03saad.jpg" alt="respmap_seg5"></p>
+<p><img src="http://wx3.sinaimg.cn/mw690/e57dfbd0ly1fe4yzhr45pj205z03pglu.jpg" alt="respmap_seg6"></p>
+<p><img src="http://wx2.sinaimg.cn/mw690/e57dfbd0ly1fe4yzhfojsj206203vt8r.jpg" alt="respmap_seg7"></p>
+<p><img src="http://wx1.sinaimg.cn/mw690/e57dfbd0ly1fe4yzh2vsmj206003t74l.jpg" alt="respmap_seg8"></p>
+<p><img src="http://wx2.sinaimg.cn/mw690/e57dfbd0ly1fe4yzgrizuj205t03p3yw.jpg" alt="respmap_seg9"></p>
+<p>分割后，目标的响应变小，精度更高，但是也导致抗干扰能力下降。</p>
+<p>SPR值不升反降。这种思路可能有问题。。。<strong>暂时放弃</strong>。</p>
+<p><strong>分析</strong></p>
+<p>分割后效果不佳，说明模板图像中的背景信息作为上下文，对于追踪本身也是很重要的。可是对基于相似性学习的SiamFC来说，为什么目标以外的背景信息会这么重要呢？</p>
+<h4 id="3、利用空间信息，估计运动模型"><a href="#3、利用空间信息，估计运动模型" class="headerlink" title="3、利用空间信息，估计运动模型"></a>3、利用空间信息，估计运动模型</h4><p>在存在较多相似目标的场景中，可能特征匹配难以准确地判断哪个才是真正的目标。而人在这种场景下追踪目标的策略往往是根据</p>
 <ul>
 <li>1、目标的空间信息，例如一队人中的第几个，或者目标周围有哪些参照物。这一点可以通过对目标旁边的背景进行建模实现。</li>
 <li>2、根据目标的运动轨迹进行预测，因为目标的变化(无论是位置还是外观)在序列中往往是连续可微的。</li>
