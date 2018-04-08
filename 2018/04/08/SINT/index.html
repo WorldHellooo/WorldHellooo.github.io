@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Intro of Siamese Instance Search for Tracking | WorldHellooo's Blog</title><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/5.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Intro of Siamese Instance Search for Tracking</h1><a id="logo" href="/.">WorldHellooo's Blog</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Intro of Siamese Instance Search for Tracking</h1><div class="post-meta">Apr 8, 2018<span> | </span><span class="category"><a href="/categories/Visual-Tracking/">Visual Tracking</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> Hits</span></span></div><div class="post-content"><h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><ul>
+<li><strong>孪生结构</strong></li>
+<li>没有应用模型更新</li>
+<li>没有遮挡检测</li>
+<li>没有采用追踪器集合</li>
+<li>没有几何匹配</li>
+<li>state-of-the-art</li>
+</ul>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>基于图像检索的思路，将孪生网络训练成为一个通用的、对追踪中各种干扰invariant的匹配函数。</p>
+<p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fdtdvyphmoj20kt0cadkg.jpg" alt="Fig1"></p>
+<p>Matching function m从视频数据集上学习得到。追踪器仅仅需要寻找到和第一帧初始图像patch匹配最好的那个patch。</p>
+<h3 id="匹配学习"><a href="#匹配学习" class="headerlink" title="匹配学习"></a>匹配学习</h3><p>《Attributes and categories for generic instance search from one example》介绍了一种匹配学习的方法，即使目标的视角有较大的变化也能很好地应对。</p>
+<p>本文提出一种能够应对各种追踪目标外观变化的更通用的匹配函数。训练完成后，该函数不再改变。</p>
+<h2 id="贡献"><a href="#贡献" class="headerlink" title="贡献"></a>贡献</h2><p>首先，提出从<strong>额外的视频数据</strong>中学习一个<strong>通用的追踪匹配函数</strong>，以鲁棒地应对目标在视频序列中可能会遭遇的常见的外观变化。</p>
+<p>第二，基于该匹配函数，提出一个达到<strong>state-of-the-art的追踪器</strong>。</p>
+<p>第三，为了学习匹配函数，针对性地提出了<strong>双流孪生网络结构</strong>。</p>
+<p>最后，该追踪器能够实现<strong>re-identification</strong>。</p>
+<h2 id="相关工作"><a href="#相关工作" class="headerlink" title="相关工作"></a>相关工作</h2><h3 id="追踪中的匹配函数"><a href="#追踪中的匹配函数" class="headerlink" title="追踪中的匹配函数"></a>追踪中的匹配函数</h3><p><strong>NCC</strong>，Normalized Cross-Correlation，最古老的的匹配追踪算法。虽然简单，却非常有效。</p>
+<p><strong>Lucas and Kanade Tracker</strong>给匹配函数增加了一个仿射变换。</p>
+<p><strong>MST</strong>则依靠于概率匹配法Probabilistic Matching。</p>
+<p><strong>FRT</strong>使用地面移动物的距离来匹配。</p>
+<p><strong>IVT</strong>通过追踪中获得的特征图像度量进行匹配。</p>
+<p><strong>HBT</strong>以一种概率方式利用HOG特征。</p>
+<p><strong>FBT</strong>使用颜色不变性来对光照变化鲁棒。</p>
+<p>上述方法的匹配函数均显式地针对某一种干扰建模。本文则与之不同，直接从标注视频学习出匹配函数，更为通用。</p>
+<h3 id="近期追踪方法"><a href="#近期追踪方法" class="headerlink" title="近期追踪方法"></a>近期追踪方法</h3><p><strong>TLD</strong>将NCC匹配和一个差分追踪器和一个复杂的更新模型结合在一起。</p>
+<p><strong>Struck</strong>基于结构化SVM，以偏移量作为连续性的输出，并谨慎更新。</p>
+<p><strong>MEEM</strong>设计了一个判别追踪器，保存一组历史快照作为专家，由专家基于熵规则优化产生每帧的预测。</p>
+<p><strong>Alien</strong>是一个依赖对局部特征过采样和机遇RANSAC几何匹配的长期跟踪器。</p>
+<p><strong>MUSTer</strong>有一部分负责存储目标的短时记忆，并使用集成互相关滤波器进行短时跟踪，另一部分负责长时记忆，依赖于RANSAC匹配。</p>
+<p><strong>AND-OR</strong>追踪器提出了解释对象的外观和结构变化的层次、组成与/或图形的辨别学习。</p>
+<p>本文专注于简单的跟踪推理方案，即寻找与第一帧中的初始目标最匹配的图像元。复杂度被留给如何训练一个对于外观变化鲁棒的匹配函数。也就是说，本文提供的匹配函数可以与其他追踪算法相结合，以提升其性能。</p>
+<h3 id="追踪中的深度学习"><a href="#追踪中的深度学习" class="headerlink" title="追踪中的深度学习"></a>追踪中的深度学习</h3><p><strong>DLT</strong>使用栈式降噪自编码器学习追踪特征，但表现不佳。<strong>SO-DLT</strong>改用深度卷积网络，效果有所提升但是速度依旧受限于在线SGD。</p>
+<p><strong>DeepTrack</strong>在线学习一个目标分类器，严重受限于数据的缺失。</p>
+<p>《Online tracking by learning discriminative saliency map with convolutional neural network.》基于一个预训练的ImageNet网络，学习针对目标的显著性图。</p>
+<p>待补充。。。</p>
+<h2 id="Siamese-Instance-Search-Tracker"><a href="#Siamese-Instance-Search-Tracker" class="headerlink" title="Siamese Instance Search Tracker"></a>Siamese Instance Search Tracker</h2><p><img src="http://wx4.sinaimg.cn/mw690/e57dfbd0ly1fdtdw1fldxj20lh0ikjvk.jpg" alt="Fig2"></p>
+<p>‘conv’, ‘maxpool’, ‘roipool’, ‘fc’分别代表卷积层、最大化池化、感兴趣区域池化、全连接层。中括号中的数字是kernel size, number of outputs和stride。fc层有4096个单元，所有的卷积层后都接着一个ReLU层。</p>
+<h3 id="网络细节选择"><a href="#网络细节选择" class="headerlink" title="网络细节选择"></a>网络细节选择</h3><ul>
+<li>Max pooling会<strong>降低图像的分辨率，从而影响定位的精确性</strong>；但是却能增强对局部形变的不变性。因此本网络中只有前几层为了消除噪声提取特征而加入了maxpooling。</li>
+<li>放弃一次前向传递数以百计proposals的做法，直接将整幅图像作为输入，几层卷积后送入<strong>ROIpooling</strong>，输出长度固定的表达。</li>
+<li>layer越深，其对外观变化越不敏感，但也更不具区分力，尤其是面对同类物体的时候。因此使用<strong>多个layers的输出作为中间表达</strong>，送入loss层。</li>
+<li>ReLU激活函数的输出范围可能很大，因此网络的输出和损失函数可能被生成特征的大小而非表达质量严重影响。因此在损失层前加入<strong>L2 normalization layer</strong>。</li>
+<li>使用类AlexNet或类VGGNet，以利用ImageNet预训练的网络参数。</li>
+</ul>
+<h3 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h3><p>希望让网络生成这样的特征表达：和正样本对足够接近，而与负样本对至少相隔一个最小距离。即margin contrastive loss如下：<br>$$L(x_j, x_k, y_{jk}) = \frac{1}{2} y_{jk} D^2 + \frac{1}{2} (1 - y_{jk}) \max(0, \epsilon - D^2)$$</p>
+<p>这里$D=||f(x_j)-f(x_k)||_2$是两个L2正则化的表达的欧式距离，$y_{jk}\in\{0,1\}$表示两个输入是否是同一个目标。$\epsilon$是不同目标之间应满足的最小间距。</p>
+<h2 id="实验-amp-结论"><a href="#实验-amp-结论" class="headerlink" title="实验&amp;结论"></a>实验&amp;结论</h2><h3 id="评估标准"><a href="#评估标准" class="headerlink" title="评估标准"></a>评估标准</h3><ul>
+<li><strong>Success Plot</strong>. 如果算法估计的bounding box（bbox）和ground truth box（gt）的重叠率超过一个阈值，则判定跟踪成功。</li>
+<li><strong>Precision Plot</strong>. 如果估计的bbox中心和gt中心距离小于某个阈值，则判定追踪成功。</li>
+</ul>
+<h3 id="对比实验"><a href="#对比实验" class="headerlink" title="对比实验"></a>对比实验</h3><ul>
+<li>基于大量额外数据调整的Siamese网络（c）比直接基于ImageNet预训练的网络（a）和基于首帧数据微调的网络（b）表现都好。</li>
+<li>不加max pooling layers的网络表现更好。</li>
+<li>基于多层特征的网络（f）比基于最后一层输出的网络（e）表现更好。</li>
+<li>更深的网络（g）比浅一些的网络（f）表现更好。</li>
+</ul>
+<p><img src="http://wx2.sinaimg.cn/mw690/e57dfbd0ly1fdtlfqmsvbj20m30fhad0.jpg" alt="Tab1"></p>
+<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2><ul>
+<li>当视野内出现相似目标时，追踪器可能会在其之间跳动</li>
+<li>当有大的遮挡时，匹配函数表现糟糕</li>
+</ul>
+<p>(吐槽：markdown和mathjax会有冲突，公式中表示下标的下划线需要加\，否则就有可能会被markdown理解成加粗=。=)</p>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://worldhellooo.github.io/2018/04/08/SINT/" data-id="cjfq4dlb40005nosebvd4xb0p" class="article-share-link">分享到</a><div class="tags"><a href="/tags/实例搜索-孪生结果-目标追踪/">实例搜索 孪生结果 目标追踪</a></div><div class="post-nav"><a href="/2018/04/08/深度网络训练中的一些参数/" class="pre">深度网络训练中的一些技巧</a><a href="/2018/04/08/SiamFC改进思路/" class="next">SiamFC算法改进思路</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://worldhellooo.github.io"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Deep-Learning/">Deep Learning</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Reinforcement-Learing/">Reinforcement Learing</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Visual-Tracking/">Visual Tracking</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/增强学习-目标追踪/" style="font-size: 15px;">增强学习 目标追踪</a> <a href="/tags/增强学习/" style="font-size: 15px;">增强学习</a> <a href="/tags/目标追踪/" style="font-size: 15px;">目标追踪</a> <a href="/tags/实例搜索-孪生结果-目标追踪/" style="font-size: 15px;">实例搜索 孪生结果 目标追踪</a> <a href="/tags/目标追踪-研究背景-主流思路/" style="font-size: 15px;">目标追踪 研究背景 主流思路</a> <a href="/tags/RoIPooling-翻译/" style="font-size: 15px;">RoIPooling 翻译</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/04/08/翻译 Region of interest pooling explained/">翻译 Region of interest pooling explained</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/04/08/目标追踪经典算法系列/">目标追踪算法之研究背景</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/04/08/深度网络训练中的一些参数/">深度网络训练中的一些技巧</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/04/08/SINT/">Intro of Siamese Instance Search for Tracking</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/04/08/SiamFC改进思路/">SiamFC算法改进思路</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/04/08/hello-world/">Hello World</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/04/08/Background of Reinforcement Learning/">Background of Reinforcement Learning</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/04/08/Action-Decision Networks for Visual Tracking with Deep Reinforcement Learning/">Action-Decision Networks for Visual Tracking with Deep Reinforcement Learning</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://blog.jcix.top" title="Zhangjc's blog" target="_blank">Zhangjc's blog</a><ul></ul><a href="http://chaway.github.io" title="Chaway's blog" target="_blank">Chaway's blog</a><ul></ul><a href="http://www.votchallenge.net" title="VOT Challenge" target="_blank">VOT Challenge</a><ul></ul><a href="http://www.visual-tracking.net" title="OTB Benchmark" target="_blank">OTB Benchmark</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">© <a href="/." rel="nofollow">WorldHellooo's Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css?v=0.0.0"><script type="text/x-mathjax-config">MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+  });
+</script><script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML" async></script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
